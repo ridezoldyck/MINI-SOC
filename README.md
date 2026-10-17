@@ -1,80 +1,82 @@
 # Mini SOC Dashboard
 
-A small, self-contained **SIEM / SOC laboratory** built with Python and Flask.
-It ingests security events through an API, detects suspicious patterns with a
-rule engine, raises deduplicated alerts, and gives an analyst a dashboard to
-investigate, close alerts and review incident reports.
+Laboratorium **SIEM / SOC** mini yang berdiri sendiri, dibuat dengan Python dan
+Flask. Aplikasi ini menerima event keamanan lewat API, mendeteksi pola
+mencurigakan dengan rule engine, membuat alert yang sudah dideduplikasi, dan
+menyediakan dashboard bagi analis untuk menginvestigasi, menutup alert, dan
+membaca laporan insiden.
 
-The project is a learning and portfolio lab. It runs only on `127.0.0.1` and
-is tested with **synthetic events** produced by a built-in simulator, so no
-real system is ever attacked.
+Project ini adalah lab pembelajaran sekaligus portofolio. Aplikasi hanya
+berjalan di `127.0.0.1` dan diuji dengan **event sintetis** dari simulator
+bawaan, sehingga tidak ada sistem nyata yang diserang.
 
-## Features
+## Fitur
 
-- **Event ingestion API** (`POST /api/events`) with API-key authentication and
-  strict input validation.
-- **Detection engine** with 7 rules, each mapped to a MITRE ATT&CK technique:
-  brute force, repeated failed logins, network scan, suspicious process,
-  suspicious network connection, SQL injection patterns and high-severity events.
-- **Windowed correlation**: login failures are counted per source IP inside a
-  5-minute window directly in SQL.
-- **Alert deduplication**: repeated activity updates one open alert instead of
-  flooding the queue (7 failed logins produce 2 alerts, not 7).
-- **Analyst workflow**: events search and filter, event detail, alert queue,
-  investigate / close, incident page and incident report page.
-- **Role-based access**: `admin` can enable or disable detection rules,
-  `analyst` cannot.
-- **Rules page** generated from a single rule registry, with an enable/disable switch.
-- **Attack simulator** (`scripts/simulate_events.py`) to test every rule from
-  the terminal.
-- **Automated tests** (36 tests, standard library only).
+- **API ingestion event** (`POST /api/events`) dengan autentikasi API key dan
+  validasi input yang ketat.
+- **Detection engine** dengan 7 rule, masing-masing dipetakan ke teknik MITRE
+  ATT&CK: brute force, login gagal berulang, network scan, proses mencurigakan,
+  koneksi jaringan mencurigakan, pola SQL injection, dan event berseverity tinggi.
+- **Korelasi berbasis jendela waktu**: login gagal dihitung per IP sumber dalam
+  jendela 5 menit langsung di SQL.
+- **Deduplikasi alert**: aktivitas berulang memperbarui satu alert yang masih
+  terbuka, bukan membanjiri antrean (7 login gagal menghasilkan 2 alert, bukan 7).
+- **Alur kerja analis**: pencarian dan filter event, detail event, antrean
+  alert, investigate / close, halaman incident, dan halaman incident report.
+- **Akses berbasis role**: `admin` dapat mengaktifkan atau menonaktifkan
+  detection rule, `analyst` tidak.
+- **Halaman Detections** dibuat dari satu registry rule, dengan tombol
+  enable/disable.
+- **Simulator serangan** (`scripts/simulate_events.py`) untuk menguji semua
+  rule dari terminal.
+- **Pengujian otomatis** (36 test, hanya memakai library standar Python).
 
-## Architecture
+## Arsitektur
 
 ```mermaid
 flowchart LR
-    S["Simulator<br/>(scripts/simulate_events.py)"] -->|"POST /api/events<br/>X-API-Key"| API["Ingestion API<br/>validation + auth"]
+    S["Simulator<br/>(scripts/simulate_events.py)"] -->|"POST /api/events<br/>X-API-Key"| API["API Ingestion<br/>validasi + autentikasi"]
     API --> EV[("security_events")]
     API --> ENG["Detection engine<br/>detector/rules.py"]
     EV --> ENG
-    ENG -->|"dedup + create"| AL[("security_alerts")]
-    EV --> UI["Flask dashboard"]
+    ENG -->|"dedup + buat alert"| AL[("security_alerts")]
+    EV --> UI["Dashboard Flask"]
     AL --> UI
-    UI --> AN["Analyst:<br/>investigate, close, report"]
+    UI --> AN["Analis:<br/>investigate, close, laporan"]
 ```
 
-Flow: **generate activity -> ingest event -> detect -> create alert ->
-investigate -> report.**
+Alur: **buat aktivitas -> ingest event -> deteksi -> buat alert ->
+investigasi -> laporan.**
 
-## Tech stack
+## Teknologi
 
-Python 3, Flask, SQLite, Jinja2 templates, HTML/CSS/JavaScript. No database
-server and no extra runtime dependencies besides Flask.
+Python 3, Flask, SQLite, template Jinja2, HTML/CSS/JavaScript. Tidak perlu
+database server dan tidak ada dependensi runtime selain Flask.
 
-## Project structure
+## Struktur project
 
 ```
 mini-soc-dashboard/
-├── app.py                    # Flask app: routes, auth, CSRF, ingestion API
-├── config.py                 # Environment / .env configuration
-├── db.py                     # Schema, events, alerts, deduplication
+├── app.py                    # Aplikasi Flask: route, auth, CSRF, API ingestion
+├── config.py                 # Konfigurasi environment / .env
+├── db.py                     # Skema, event, alert, deduplikasi
 ├── detector/
-│   ├── rules.py              # Rule functions + rule registry (MITRE mapping)
-│   └── detection_engine.py   # Runs enabled rules, creates alerts
+│   ├── rules.py              # Fungsi rule + registry rule (pemetaan MITRE)
+│   └── detection_engine.py   # Menjalankan rule aktif, membuat alert
 ├── scripts/
-│   └── simulate_events.py    # Terminal attack simulator
-├── templates/ static/        # Dashboard UI
-├── tests/                    # Unit and integration tests (unittest)
-├── reports/                  # Incident reports and template
-├── screenshots/              # Images used by this README
-├── .env.example              # Configuration template
-├── scope.md                  # Lab scope and boundaries
+│   └── simulate_events.py    # Simulator serangan dari terminal
+├── templates/ static/        # Tampilan dashboard
+├── tests/                    # Unit test dan integration test (unittest)
+├── reports/                  # Laporan insiden dan template
+├── screenshots/              # Gambar yang dipakai README ini
+├── .env.example              # Template konfigurasi
+├── scope.md                  # Ruang lingkup dan batasan lab
 └── requirements.txt
 ```
 
-## Quick start
+## Memulai
 
-Requires Python 3.10 or newer.
+Membutuhkan Python 3.10 atau lebih baru.
 
 **Windows (PowerShell)**
 
@@ -94,195 +96,202 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Edit `.env` and set `SIEM_API_KEY` and `SECRET_KEY`. Generate random values with:
+Edit `.env` lalu isi `SIEM_API_KEY` dan `SECRET_KEY`. Buat nilai acak dengan:
 
 ```
 python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-Start the app:
+Jalankan aplikasi:
 
 ```
 python app.py
 ```
 
-Open http://127.0.0.1:5000.
+Buka http://127.0.0.1:5000.
 
-On the first run the database is created and the accounts `admin` and
-`analyst` are added. If `ADMIN_PASSWORD` / `ANALYST_PASSWORD` are empty in
-`.env`, random passwords are generated and **printed once in the console**;
-copy them then. To start from a clean state, stop the app and delete
+Pada run pertama, database dibuat dan akun `admin` serta `analyst`
+ditambahkan. Jika `ADMIN_PASSWORD` / `ANALYST_PASSWORD` kosong di `.env`,
+password acak dibuat dan **hanya ditampilkan sekali di console**; salin saat
+itu juga. Untuk memulai dari kondisi bersih, hentikan aplikasi lalu hapus
 `database/soc.db`.
 
-## Configuration
+## Konfigurasi
 
-All settings are read from environment variables or from `.env`.
+Semua pengaturan dibaca dari environment variable atau dari `.env`.
 
-| Variable | Purpose | If empty |
+| Variabel | Fungsi | Jika kosong |
 |---|---|---|
-| `SIEM_API_KEY` | Key required by `POST /api/events` (`X-API-Key` header) | The ingestion API is disabled (HTTP 503) |
-| `SECRET_KEY` | Signs the Flask session cookie | A random key is used until restart |
-| `ADMIN_PASSWORD`, `ANALYST_PASSWORD` | Initial account passwords | Random, shown once in the console |
-| `FLASK_DEBUG` | `1` enables Flask debug mode | Off |
-| `HOST`, `PORT` | Bind address (default `127.0.0.1:5000`) | Defaults |
-| `SESSION_COOKIE_SECURE` | `1` marks the session cookie Secure (needs HTTPS) | Off |
+| `SIEM_API_KEY` | Kunci yang wajib untuk `POST /api/events` (header `X-API-Key`) | API ingestion nonaktif (HTTP 503) |
+| `SECRET_KEY` | Menandatangani cookie session Flask | Kunci acak dipakai sampai aplikasi di-restart |
+| `ADMIN_PASSWORD`, `ANALYST_PASSWORD` | Password awal akun | Acak, ditampilkan sekali di console |
+| `FLASK_DEBUG` | `1` mengaktifkan mode debug Flask | Mati |
+| `HOST`, `PORT` | Alamat bind (default `127.0.0.1:5000`) | Default |
+| `SESSION_COOKIE_SECURE` | `1` menandai cookie session sebagai Secure (butuh HTTPS) | Mati |
 
-`.env` is listed in `.gitignore` and must never be committed.
+`.env` sudah masuk `.gitignore` dan tidak boleh di-commit.
 
 ## Detection rules
 
-| Code | Rule | Condition | Alert severity | MITRE ATT&CK |
+| Kode | Rule | Kondisi | Severity alert | MITRE ATT&CK |
 |---|---|---|---|---|
-| AUTH-001 | Repeated Failed Login | 3 or more failed logins from one IP in 5 minutes | MEDIUM | T1110 |
-| AUTH-002 | Brute Force Login | 5 or more failed logins from one IP in 5 minutes | HIGH | T1110 |
-| NET-001 | Network Scan | `NETWORK_SCAN` event | MEDIUM | T1046 |
-| PROC-001 | Suspicious Process | `PROCESS_START` of `powershell.exe`, `cmd.exe`, `wscript.exe`, `cscript.exe`, `mshta.exe`, `rundll32.exe`, `regsvr32.exe`, `certutil.exe` or `bitsadmin.exe` (full paths are handled) | HIGH | T1059 / T1218 |
-| NET-002 | Suspicious Network Connection | `NETWORK_CONNECTION` to port 4444, 1337, 31337, 5555 or 6666 (from `destination_port` or from the details text) | MEDIUM | T1571 |
-| SEV-001 | High Severity Event | Any event with severity `HIGH` or `CRITICAL` | HIGH / CRITICAL | - |
-| WEB-001 | SQL Injection Pattern | `WEB_REQUEST` matching tautology, `UNION SELECT`, stacked query, time-based, schema enumeration or comment-after-quote patterns (URL-decoded first) | HIGH | T1190 |
+| AUTH-001 | Repeated Failed Login | 3 atau lebih login gagal dari satu IP dalam 5 menit | MEDIUM | T1110 |
+| AUTH-002 | Brute Force Login | 5 atau lebih login gagal dari satu IP dalam 5 menit | HIGH | T1110 |
+| NET-001 | Network Scan | Event `NETWORK_SCAN` | MEDIUM | T1046 |
+| PROC-001 | Suspicious Process | `PROCESS_START` untuk `powershell.exe`, `cmd.exe`, `wscript.exe`, `cscript.exe`, `mshta.exe`, `rundll32.exe`, `regsvr32.exe`, `certutil.exe`, atau `bitsadmin.exe` (path lengkap juga dikenali) | HIGH | T1059 / T1218 |
+| NET-002 | Suspicious Network Connection | `NETWORK_CONNECTION` ke port 4444, 1337, 31337, 5555, atau 6666 (dari `destination_port` atau dari teks details) | MEDIUM | T1571 |
+| SEV-001 | High Severity Event | Event apa pun dengan severity `HIGH` atau `CRITICAL` | HIGH / CRITICAL | - |
+| WEB-001 | SQL Injection Pattern | `WEB_REQUEST` yang cocok dengan pola tautology, `UNION SELECT`, stacked query, time-based, enumerasi skema, atau komentar setelah tanda kutip (di-URL-decode terlebih dahulu) | HIGH | T1190 |
 
-Thresholds, watchlists and patterns are constants at the top of
-`detector/rules.py`. Rules can be enabled or disabled by an admin on the
-**Detections** page.
+Ambang batas, watchlist, dan pola adalah konstanta di bagian atas
+`detector/rules.py`. Rule dapat diaktifkan atau dinonaktifkan oleh admin di
+halaman **Detections**.
 
-### Alert lifecycle and deduplication
+### Siklus alert dan deduplikasi
 
-Alerts move through `OPEN -> INVESTIGATING -> CLOSED`. While an alert of the
-same type and source IP (and the same process or destination for PROC-001 and
-NET-002) is `OPEN` or `INVESTIGATING` and was created within the last 15
-minutes, new matching activity only updates that alert. Once it is closed, new
-activity creates a new alert.
+Alert bergerak melalui `OPEN -> INVESTIGATING -> CLOSED`. Selama sebuah alert
+dengan tipe dan IP sumber yang sama (serta proses atau tujuan yang sama untuk
+PROC-001 dan NET-002) berstatus `OPEN` atau `INVESTIGATING` dan dibuat dalam
+15 menit terakhir, aktivitas baru yang cocok hanya memperbarui alert tersebut.
+Setelah alert ditutup, aktivitas baru akan membuat alert baru.
 
-## SIEM ingestion API
+## API ingestion SIEM
 
-`POST /api/events` with header `X-API-Key` and a JSON body.
+`POST /api/events` dengan header `X-API-Key` dan body JSON.
 
-| Field | Required | Notes |
+| Field | Wajib | Catatan |
 |---|---|---|
-| `event_type` | yes | `A-Z`, `0-9`, `_`, 3 to 40 characters; lowercase is upper-cased |
-| `source_ip`, `destination_ip` | no | Valid IPv4/IPv6; `::1` is stored as `127.0.0.1` |
-| `destination_port` | no | Integer 0 to 65535 |
-| `username` | no | Up to 64 characters |
-| `process_name` | no | Up to 128 characters |
-| `details` | no | Up to 500 characters |
-| `severity` | no | `INFO`, `LOW`, `WARNING`, `MEDIUM`, `HIGH`, `CRITICAL` (default `INFO`) |
+| `event_type` | ya | `A-Z`, `0-9`, `_`, 3 sampai 40 karakter; huruf kecil diubah menjadi kapital |
+| `source_ip`, `destination_ip` | tidak | IPv4/IPv6 yang valid; `::1` disimpan sebagai `127.0.0.1` |
+| `destination_port` | tidak | Bilangan bulat 0 sampai 65535 |
+| `username` | tidak | Maksimal 64 karakter |
+| `process_name` | tidak | Maksimal 128 karakter |
+| `details` | tidak | Maksimal 500 karakter |
+| `severity` | tidak | `INFO`, `LOW`, `WARNING`, `MEDIUM`, `HIGH`, `CRITICAL` (default `INFO`) |
 
-Responses: `201` with the stored `event_id` and the alerts newly created by this
-event, `400` for invalid input, `401` for a wrong key, `503` if no key is
-configured. Request bodies are limited to 64 KB.
+Respons: `201` beserta `event_id` dan alert yang baru dibuat oleh event
+tersebut, `400` untuk input tidak valid, `401` untuk key yang salah, `503` jika
+key belum dikonfigurasi. Ukuran body request dibatasi 64 KB.
 
-PowerShell example:
+Contoh PowerShell:
 
 ```powershell
 Invoke-RestMethod -Uri http://127.0.0.1:5000/api/events -Method Post `
-  -Headers @{ "X-API-Key" = "<your SIEM_API_KEY>" } `
+  -Headers @{ "X-API-Key" = "<SIEM_API_KEY kamu>" } `
   -ContentType "application/json" `
   -Body '{"event_type":"NETWORK_SCAN","source_ip":"203.0.113.50","details":"Port scan"}'
 ```
 
-`GET /api/health` returns the service status without authentication.
+`GET /api/health` mengembalikan status layanan tanpa autentikasi.
 
-## Testing
+## Pengujian
 
-### 1. Manual attack simulation
+### 1. Simulasi serangan manual
 
-Start the app in one terminal, then open a second terminal in the project
-folder:
+Jalankan aplikasi di satu terminal, lalu buka terminal kedua di folder project:
 
 ```
 python scripts/simulate_events.py brute-force
 python scripts/simulate_events.py all
 ```
 
-The simulator sends synthetic events to the local API only, using the
-documentation IP range `203.0.113.0/24` as the source. For every event it
-prints the alerts that event created.
+Simulator hanya mengirim event sintetis ke API lokal, dengan rentang IP
+dokumentasi `203.0.113.0/24` sebagai sumber. Untuk setiap event, simulator
+menampilkan alert yang dibuat oleh event itu.
 
-| Scenario | Events sent | Expected new alert |
+| Skenario | Event yang dikirim | Alert baru yang diharapkan |
 |---|---|---|
-| `failed-login` | 1 `LOGIN_FAILED` | none (below the 3-failure threshold) |
-| `brute-force` | 6 `LOGIN_FAILED` (`--count` to change, minimum 5) | `FAILED_LOGIN` / MEDIUM on the 3rd failure, `BRUTE_FORCE` / HIGH on the 5th |
+| `failed-login` | 1 `LOGIN_FAILED` | tidak ada (di bawah ambang 3 kegagalan) |
+| `brute-force` | 6 `LOGIN_FAILED` (`--count` untuk mengubah, minimal 5) | `FAILED_LOGIN` / MEDIUM pada kegagalan ke-3, `BRUTE_FORCE` / HIGH pada kegagalan ke-5 |
 | `network-scan` | 1 `NETWORK_SCAN` | `NETWORK_SCAN` / MEDIUM |
-| `suspicious-process` | `PROCESS_START` of `powershell.exe` | `SUSPICIOUS_PROCESS` / HIGH |
-| `suspicious-network` | `NETWORK_CONNECTION` to `:4444` | `SUSPICIOUS_NETWORK` / MEDIUM |
-| `sql-injection` | `WEB_REQUEST` with `' OR '1'='1' -- -` | `SQL_INJECTION` / HIGH |
-| `high-severity` | `MALWARE_DETECTED` with severity HIGH | `HIGH_SEVERITY_EVENT` / HIGH |
-| `all` | all of the above | 7 alerts in total on an empty database |
+| `suspicious-process` | `PROCESS_START` untuk `powershell.exe` | `SUSPICIOUS_PROCESS` / HIGH |
+| `suspicious-network` | `NETWORK_CONNECTION` ke `:4444` | `SUSPICIOUS_NETWORK` / MEDIUM |
+| `sql-injection` | `WEB_REQUEST` dengan `' OR '1'='1' -- -` | `SQL_INJECTION` / HIGH |
+| `high-severity` | `MALWARE_DETECTED` dengan severity HIGH | `HIGH_SEVERITY_EVENT` / HIGH |
+| `all` | semua skenario di atas | total 7 alert pada database kosong |
 
-Running a scenario again within 15 minutes creates no new alert, because the
-open alert is reused. Close the alerts in the dashboard (or use another
-`--ip`) to see them fire again. Options: `--ip`, `--count`, `--delay`, `--url`,
-`--api-key`.
+Menjalankan skenario yang sama lagi dalam 15 menit tidak membuat alert baru,
+karena alert yang masih terbuka dipakai ulang. Tutup alert di dashboard (atau
+pakai `--ip` lain) agar alert muncul kembali. Opsi: `--ip`, `--count`,
+`--delay`, `--url`, `--api-key`.
 
-### 2. Automated tests
+### 2. Pengujian otomatis
 
 ```
 python -m unittest discover -s tests -t . -v
 ```
 
-The 36 tests use a temporary database and cover: failed-login and brute-force
-thresholds and time windows, deduplication, per-IP tracking, disabled rules,
-every detection rule (including SQL injection payloads and benign requests),
-API authentication and validation, login CSRF protection, role-based access,
-and the full alert workflow.
+Ke-36 test memakai database sementara dan mencakup: ambang batas dan jendela
+waktu login gagal serta brute force, deduplikasi, pelacakan per IP, rule yang
+dinonaktifkan, setiap detection rule (termasuk payload SQL injection dan
+request yang tidak berbahaya), autentikasi dan validasi API, proteksi CSRF
+pada login, akses berbasis role, dan seluruh alur kerja alert.
 
-## Screenshots
+## Screenshot
 
 | Dashboard | Alerts |
 |---|---|
 | ![Dashboard](screenshots/dashboard.png) | ![Alerts](screenshots/alerts.png) |
-| Overview of event counts, open alerts and recent activity. | Alert queue after running `simulate_events.py all`. |
+| Ringkasan jumlah event, alert terbuka, dan aktivitas terbaru. | Antrean alert setelah menjalankan `simulate_events.py all`. |
 
-| Incident investigation | Detection rules |
+| Investigasi incident | Detection rules |
 |---|---|
 | ![Incident](screenshots/incident.png) | ![Detections](screenshots/detections.png) |
-| Alert details with the triggering event and related events. | Rule registry with MITRE mapping and enable/disable switch (admin). |
+| Detail alert beserta event pemicu dan event terkait. | Registry rule dengan pemetaan MITRE dan tombol enable/disable (admin). |
 
-## Incident reports
+## Laporan insiden
 
-Example reports written from simulated runs:
+Contoh laporan yang ditulis dari hasil simulasi:
 
 - [Incident 001 - Brute Force Login](reports/incident-001.md)
 - [Incident 002 - SQL Injection Attempt](reports/incident-002.md)
-- [Report template](reports/TEMPLATE.md)
+- [Template laporan](reports/TEMPLATE.md)
 
-## Security design
+## Desain keamanan
 
-The lab itself follows the practices it is meant to demonstrate:
+Lab ini sendiri menerapkan praktik yang ingin didemonstrasikannya:
 
-- All SQL uses parameterized queries; Jinja2 autoescaping is on and no output is marked safe.
-- Passwords are hashed (Werkzeug); no credentials are stored in the repository
-  or shown in the UI.
-- Secrets and the API key come from the environment, never from code.
-- CSRF token on every POST form, including login.
-- Every page requires login by default; rule management is admin-only.
-- API key compared in constant time; payloads validated and size-limited.
-- Session cookie is `HttpOnly` and `SameSite=Lax`, with an 8-hour lifetime.
-- Debug mode is off unless `FLASK_DEBUG=1`; the server binds to `127.0.0.1`.
+- Semua SQL memakai parameterized query; autoescaping Jinja2 aktif dan tidak
+  ada output yang ditandai aman secara paksa.
+- Password di-hash (Werkzeug); tidak ada kredensial yang disimpan di repository
+  atau ditampilkan di UI.
+- Secret dan API key berasal dari environment, bukan dari kode.
+- Token CSRF di setiap form POST, termasuk login.
+- Setiap halaman wajib login secara default; pengelolaan rule hanya untuk admin.
+- API key dibandingkan secara constant-time; payload divalidasi dan dibatasi ukurannya.
+- Cookie session `HttpOnly` dan `SameSite=Lax`, dengan masa berlaku 8 jam.
+- Mode debug mati kecuali `FLASK_DEBUG=1`; server hanya bind ke `127.0.0.1`.
 
-## Limitations
+## Keterbatasan
 
-- Detection is rule-based and heuristic. The SQL injection rule is not a WAF
-  and can miss obfuscated payloads.
-- Timestamps use the server's local time, not UTC.
-- Single-node SQLite and the Flask development server; not intended for production.
-- One shared API key, no TLS, no user management screen and no login lockout.
-- Events come from the API only; there are no agents or log shippers.
+- Deteksi berbasis rule dan bersifat heuristik. Rule SQL injection bukan WAF
+  dan bisa melewatkan payload yang dikaburkan.
+- Timestamp memakai waktu lokal server, bukan UTC.
+- SQLite satu node dan server pengembangan Flask; tidak ditujukan untuk produksi.
+- Satu API key bersama, tanpa TLS, tanpa halaman manajemen user, dan tanpa
+  lockout login.
+- Event hanya masuk lewat API; belum ada agent atau log shipper.
 
 ## Roadmap
 
-- UTC timestamps and a time-range filter on the events page.
-- Login lockout or throttling and a user management page.
-- Log shippers (for example a Windows Event Log or syslog forwarder).
-- Alert enrichment (GeoIP, IP reputation) and notifications (email or webhook).
-- Export of incident reports to PDF.
+- Timestamp UTC dan filter rentang waktu di halaman events.
+- Lockout atau throttling login dan halaman manajemen user.
+- Log shipper (misalnya forwarder Windows Event Log atau syslog).
+- Pengayaan alert (GeoIP, reputasi IP) dan notifikasi (email atau webhook).
+- Ekspor laporan insiden ke PDF.
 
-## Scope and disclaimer
+## Ruang lingkup dan disclaimer
 
-This is a local educational security laboratory; see [scope.md](scope.md).
-Use it only on systems you own. Do not point the simulator or the API at any
-third-party system.
+Ini adalah laboratorium keamanan edukasi lokal; lihat [scope.md](scope.md).
+Gunakan hanya pada sistem milik sendiri. Jangan arahkan simulator atau API ke
+sistem pihak ketiga mana pun.
 
-## License
+Saya membuat lab ini sebenarnya bertujuan untuk latihan yang dimana lab ini bisa
+menggambarkan seluruh log event atau aktivitas yang bisa saya selidiki dan saya pelajari.
+Sekaligus dalam pembuatan ini saya bisa tau serangan serangan nya atau disebut pentesting,
+Jadi saya disini sekalian mendalami defensif dan attacker
 
-MIT. See [LICENSE](LICENSE).
+## Lisensi
+
+MIT. Lihat [LICENSE](LICENSE).
+Email : redigrandisvinata21@gmail.com
