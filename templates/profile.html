@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}
+Profile · Mini SOC SIEM
+{% endblock %}
+
+
+{% block page_heading %}
+Profile
+{% endblock %}
+
+
+{% block content %}
+
+<div class="content">
+
+
+    <div class="page-header">
+
+        <div>
+
+            <h1>
+                Analyst Profile
+            </h1>
+
+            <p>
+                Informasi akun yang digunakan pada SIEM Lab.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="profile-layout">
+
+
+        <div class="profile-card">
+
+            <div class="profile-cover"></div>
+
+
+            <div class="profile-main">
+
+                <div class="profile-avatar">
+                    {{ current_user[0]|upper }}
+                </div>
+
+
+                <div class="profile-info">
+
+                    <h2>
+                        {{ current_user }}
+                    </h2>
+
+                    <p>
+                        {{ current_role }}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="profile-details">
+
+
+                <div class="profile-detail">
+
+                    <span>
+                        Username
+                    </span>
+
+                    <strong>
+                        {{ current_user }}
+                    </strong>
+
+                </div>
+
+
+                <div class="profile-detail">
+
+                    <span>
+                        Role
+                    </span>
+
+                    <strong>
+                        {{ current_role }}
+                    </strong>
+
+                </div>
+
+
+                <div class="profile-detail">
+
+                    <span>
+                        Environment
+                    </span>
+
+                    <strong>
+                        Local SIEM Lab
+                    </strong>
+
+                </div>
+
+
+                <div class="profile-detail">
+
+                    <span>
+                        Access
+                    </span>
+
+                    <strong>
+                        Monitoring & Investigation
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+        <div class="security-card">
+
+            <div class="card-title">
+
+                <div class="card-title-icon">
+                    🔐
+                </div>
+
+                <div>
+
+                    <h3>
+                        Security Information
+                    </h3>
+
+                    <p>
+                        Environment information
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="security-list">
+
+
+                <div class="security-item">
+
+                    <div class="security-item-icon green">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Password Protection
+                        </strong>
+
+                        <span>
+                            Password stored using hashing.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="security-item">
+
+                    <div class="security-item-icon blue">
+                        ◈
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            SIEM Status
+                        </strong>
+
+                        <span>
+                            Local monitoring environment active.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="security-item">
+
+                    <div class="security-item-icon orange">
+                        !
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Environment
+                        </strong>
+
+                        <span>
+                            Training and portfolio laboratory.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+{% endblock %}

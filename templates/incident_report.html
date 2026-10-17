@@ -1,0 +1,576 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- =====================================================
+     INCIDENT REPORT HEADER
+===================================================== -->
+
+<div class="page-header">
+
+    <div>
+
+        <div class="eyebrow">
+            INCIDENT REPORT
+        </div>
+
+        <h1>
+            Incident #{{ alert["id"] }}
+        </h1>
+
+        <p>
+            Laporan investigasi keamanan berdasarkan alert
+            yang dihasilkan oleh Mini SOC.
+        </p>
+
+    </div>
+
+
+    <div>
+
+        {% if alert["severity"] == "HIGH" %}
+
+            <span class="badge badge-danger">
+                HIGH
+            </span>
+
+        {% elif alert["severity"] == "MEDIUM" %}
+
+            <span class="badge badge-warning">
+                MEDIUM
+            </span>
+
+        {% else %}
+
+            <span class="badge badge-info">
+                {{ alert["severity"] }}
+            </span>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     INCIDENT SUMMARY
+===================================================== -->
+
+<div class="grid grid-4">
+
+    <div class="card">
+
+        <div class="eyebrow">
+            ALERT TYPE
+        </div>
+
+        <strong>
+            {{ alert["alert_type"] }}
+        </strong>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="eyebrow">
+            SEVERITY
+        </div>
+
+        <strong>
+            {{ alert["severity"] }}
+        </strong>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="eyebrow">
+            SOURCE IP
+        </div>
+
+        <strong>
+            {{ alert["source_ip"] or "-" }}
+        </strong>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="eyebrow">
+            STATUS
+        </div>
+
+        <strong>
+            {{ alert["status"] }}
+        </strong>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     EXECUTIVE SUMMARY
+===================================================== -->
+
+<div class="card">
+
+    <div class="eyebrow">
+        EXECUTIVE SUMMARY
+    </div>
+
+    <h2>
+        Incident Summary
+    </h2>
+
+    <p>
+        {{ alert["description"] }}
+    </p>
+
+    {% if alert["alert_type"] == "BRUTE_FORCE" %}
+
+    <p>
+        Mini SOC mendeteksi beberapa percobaan login gagal
+        dari source IP yang sama dalam rentang waktu tertentu.
+        Aktivitas tersebut diklasifikasikan sebagai indikasi
+        brute force dan menghasilkan alert dengan severity
+        HIGH.
+    </p>
+
+    {% elif alert["alert_type"] == "FAILED_LOGIN" %}
+
+    <p>
+        Mini SOC mendeteksi aktivitas login yang gagal.
+        Aktivitas tersebut dicatat sebagai security event
+        dan menghasilkan alert dengan severity MEDIUM.
+    </p>
+
+    {% elif alert["alert_type"] == "NETWORK_SCAN" %}
+
+    <p>
+        Mini SOC mendeteksi aktivitas network scanning
+        dari source IP yang tercatat pada security event.
+    </p>
+
+    {% elif alert["alert_type"] == "SUSPICIOUS_PROCESS" %}
+
+    <p>
+        Mini SOC mendeteksi proses yang dikategorikan
+        sebagai suspicious process berdasarkan detection rule.
+    </p>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =====================================================
+     TRIGGERING EVENT
+===================================================== -->
+
+<div class="card">
+
+    <div class="eyebrow">
+        DETECTION SOURCE
+    </div>
+
+    <h2>
+        Triggering Event
+    </h2>
+
+    {% if triggering_event %}
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+                    <th>TIME</th>
+                    <th>EVENT</th>
+                    <th>USER</th>
+                    <th>SOURCE IP</th>
+                    <th>PROCESS</th>
+                    <th>SEVERITY</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>
+                        #{{ triggering_event["id"] }}
+                    </td>
+
+                    <td>
+                        {{ triggering_event["created_at"] }}
+                    </td>
+
+                    <td>
+                        {{ triggering_event["event_type"] }}
+                    </td>
+
+                    <td>
+                        {{ triggering_event["username"] or "-" }}
+                    </td>
+
+                    <td>
+                        {{ triggering_event["source_ip"] or "-" }}
+                    </td>
+
+                    <td>
+                        {{ triggering_event["process_name"] or "-" }}
+                    </td>
+
+                    <td>
+                        <span class="badge badge-warning">
+                            {{ triggering_event["severity"] }}
+                        </span>
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+    <div class="empty-state">
+
+        Triggering event tidak tersedia.
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =====================================================
+     EVENT TIMELINE
+===================================================== -->
+
+<div class="card">
+
+    <div class="eyebrow">
+        EVENT TIMELINE
+    </div>
+
+    <h2>
+        Related Security Events
+    </h2>
+
+    <p>
+        Timeline aktivitas dari source IP yang berkaitan
+        dengan incident.
+    </p>
+
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>TIME</th>
+                    <th>EVENT</th>
+                    <th>USER</th>
+                    <th>SOURCE IP</th>
+                    <th>PROCESS</th>
+                    <th>SEVERITY</th>
+                    <th>DETAILS</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for event in related_events %}
+
+                <tr>
+
+                    <td>
+                        {{ event["created_at"] }}
+                    </td>
+
+                    <td>
+                        {{ event["event_type"] }}
+                    </td>
+
+                    <td>
+                        {{ event["username"] or "-" }}
+                    </td>
+
+                    <td>
+                        {{ event["source_ip"] or "-" }}
+                    </td>
+
+                    <td>
+                        {{ event["process_name"] or "-" }}
+                    </td>
+
+                    <td>
+                        <span class="badge badge-info">
+                            {{ event["severity"] }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ event["details"] or "-" }}
+                    </td>
+
+                </tr>
+
+                {% else %}
+
+                <tr>
+
+                    <td colspan="7">
+
+                        <div class="empty-state">
+
+                            Tidak ada event terkait.
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ANALYST FINDINGS
+===================================================== -->
+
+<div class="grid grid-2">
+
+    <div class="card">
+
+        <div class="eyebrow">
+            ANALYST FINDINGS
+        </div>
+
+        <h2>
+            Findings
+        </h2>
+
+        <ul>
+
+            <li>
+                Source IP:
+                <strong>
+                    {{ alert["source_ip"] or "-" }}
+                </strong>
+            </li>
+
+            <li>
+                Alert:
+                <strong>
+                    {{ alert["alert_type"] }}
+                </strong>
+            </li>
+
+            <li>
+                Severity:
+                <strong>
+                    {{ alert["severity"] }}
+                </strong>
+            </li>
+
+            <li>
+                Related events:
+                <strong>
+                    {{ related_events|length }}
+                </strong>
+            </li>
+
+        </ul>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="eyebrow">
+            RECOMMENDED ACTION
+        </div>
+
+        <h2>
+            Recommended Actions
+        </h2>
+
+        <ul>
+
+            <li>
+                Monitor aktivitas dari source IP terkait.
+            </li>
+
+            <li>
+                Review authentication dan security logs.
+            </li>
+
+            <li>
+                Investigasi aktivitas account yang berkaitan.
+            </li>
+
+            <li>
+                Terapkan kontrol keamanan tambahan jika diperlukan.
+            </li>
+
+        </ul>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     INCIDENT METADATA
+===================================================== -->
+
+<div class="card">
+
+    <div class="eyebrow">
+        INCIDENT METADATA
+    </div>
+
+    <h2>
+        Report Information
+    </h2>
+
+
+    <div class="indicator-list">
+
+        <div class="indicator-row">
+
+            <span>
+                Incident ID
+            </span>
+
+            <strong>
+                #{{ alert["id"] }}
+            </strong>
+
+        </div>
+
+
+        <div class="indicator-row">
+
+            <span>
+                Alert Type
+            </span>
+
+            <strong>
+                {{ alert["alert_type"] }}
+            </strong>
+
+        </div>
+
+
+        <div class="indicator-row">
+
+            <span>
+                Severity
+            </span>
+
+            <strong>
+                {{ alert["severity"] }}
+            </strong>
+
+        </div>
+
+
+        <div class="indicator-row">
+
+            <span>
+                Status
+            </span>
+
+            <strong>
+                {{ alert["status"] }}
+            </strong>
+
+        </div>
+
+
+        <div class="indicator-row">
+
+            <span>
+                Created At
+            </span>
+
+            <strong>
+                {{ alert["created_at"] }}
+            </strong>
+
+        </div>
+
+
+        <div class="indicator-row">
+
+            <span>
+                Updated At
+            </span>
+
+            <strong>
+                {{ alert["updated_at"] or "-" }}
+            </strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     NAVIGATION
+===================================================== -->
+
+<div class="incident-actions">
+
+    <a
+        href="{{ url_for('incident', alert_id=alert['id']) }}"
+        class="btn btn-primary"
+    >
+        ← Back to Investigation
+    </a>
+
+    <a
+        href="{{ url_for('alerts') }}"
+        class="btn btn-success"
+    >
+        Security Alerts
+    </a>
+
+</div>
+
+
+{% endblock %}

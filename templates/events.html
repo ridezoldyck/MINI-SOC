@@ -1,0 +1,450 @@
+{% extends "base.html" %}
+
+{% block title %}
+Security Events · Mini SOC
+{% endblock %}
+
+{% block page_heading %}
+Security Events
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <div class="eyebrow">
+            SECURITY EVENT MANAGEMENT
+        </div>
+
+        <h2>
+            Event Explorer
+        </h2>
+
+        <p>
+            Cari dan analisis seluruh aktivitas keamanan yang diterima oleh Mini SIEM.
+        </p>
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     FILTER
+===================================================== -->
+
+<div class="filter-card">
+
+    <form method="GET" action="{{ url_for('events') }}">
+
+        <div class="filter-grid">
+
+            <div class="filter-group">
+
+                <label for="search">
+                    Search
+                </label>
+
+                <input
+                    type="text"
+                    id="search"
+                    name="search"
+                    value="{{ search }}"
+                    placeholder="Cari event, user, IP, detail..."
+                >
+
+            </div>
+
+
+            <div class="filter-group">
+
+                <label for="event_type">
+                    Event Type
+                </label>
+
+                <select
+                    id="event_type"
+                    name="event_type"
+                >
+
+                    <option value="">
+                        Semua Event
+                    </option>
+
+                    {% for type in event_types %}
+
+                    <option
+                        value="{{ type }}"
+                        {% if event_type == type %}selected{% endif %}
+                    >
+                        {{ type }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="filter-group">
+
+                <label for="severity">
+                    Severity
+                </label>
+
+                <select
+                    id="severity"
+                    name="severity"
+                >
+
+                    <option value="">
+                        Semua Severity
+                    </option>
+
+                    <option
+                        value="INFO"
+                        {% if severity == "INFO" %}selected{% endif %}
+                    >
+                        INFO
+                    </option>
+
+                    <option
+                        value="WARNING"
+                        {% if severity == "WARNING" %}selected{% endif %}
+                    >
+                        WARNING
+                    </option>
+
+                    <option
+                        value="MEDIUM"
+                        {% if severity == "MEDIUM" %}selected{% endif %}
+                    >
+                        MEDIUM
+                    </option>
+
+                    <option
+                        value="HIGH"
+                        {% if severity == "HIGH" %}selected{% endif %}
+                    >
+                        HIGH
+                    </option>
+
+                    <option
+                        value="CRITICAL"
+                        {% if severity == "CRITICAL" %}selected{% endif %}
+                    >
+                        CRITICAL
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="filter-group">
+
+                <label for="source_ip">
+                    Source IP
+                </label>
+
+                <input
+                    type="text"
+                    id="source_ip"
+                    name="source_ip"
+                    value="{{ source_ip }}"
+                    placeholder="Contoh: 127.0.0.1"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="filter-actions">
+
+            <button
+                type="submit"
+                class="primary-btn"
+            >
+                🔎 Apply Filter
+            </button>
+
+
+            <a
+                href="{{ url_for('events') }}"
+                class="secondary-btn"
+            >
+                Reset
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<!-- =====================================================
+     RESULT INFO
+===================================================== -->
+
+<div class="section-header">
+
+    <div>
+
+        <h3>
+            Security Event Log
+        </h3>
+
+        <p>
+            Menampilkan
+            <strong>{{ events|length }}</strong>
+            event.
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     EVENTS TABLE
+===================================================== -->
+
+<div class="table-card">
+
+    {% if events %}
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        TIME
+                    </th>
+
+                    <th>
+                        EVENT
+                    </th>
+
+                    <th>
+                        USER
+                    </th>
+
+                    <th>
+                        SOURCE IP
+                    </th>
+
+                    <th>
+                        DESTINATION
+                    </th>
+
+                    <th>
+                        PROCESS
+                    </th>
+
+                    <th>
+                        SEVERITY
+                    </th>
+
+                    <th>
+                        DETAILS
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for event in events %}
+
+                <tr>
+
+                    <td class="event-time">
+                        {{ event["created_at"] }}
+                    </td>
+
+
+                    <td>
+    <a
+        href="{{ url_for(
+            'event_detail',
+            event_id=event['id']
+        ) }}"
+        class="table-action"
+    >
+        {{ event["event_type"] }}
+    </a>
+</td>
+
+
+                    <td>
+
+                        {% if event["username"] %}
+
+                            {{ event["username"] }}
+
+                        {% else %}
+
+                            <span class="muted">
+                                -
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if event["source_ip"] %}
+
+                        <code class="ip-address">
+                            {{ event["source_ip"] }}
+                        </code>
+
+                        {% else %}
+
+                        <span class="muted">
+                            -
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if event["destination_ip"] %}
+
+                            {{ event["destination_ip"] }}
+
+                            {% if event["destination_port"] %}
+                                :{{ event["destination_port"] }}
+                            {% endif %}
+
+                        {% else %}
+
+                            <span class="muted">
+                                -
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if event["process_name"] %}
+
+                            <code>
+                                {{ event["process_name"] }}
+                            </code>
+
+                        {% else %}
+
+                            <span class="muted">
+                                -
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% set level = event["severity"]|upper %}
+
+                        <span
+                            class="severity-badge severity-{{ level|lower }}"
+                        >
+                            {{ level }}
+                        </span>
+
+                    </td>
+
+
+                    <td class="event-details">
+
+                        {{ event["details"] or "-" }}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+    <div class="empty-state">
+
+        <div class="empty-icon">
+            🔍
+        </div>
+
+        <h3>
+            Tidak ada event
+        </h3>
+
+        <p>
+            Tidak ditemukan security event berdasarkan filter yang digunakan.
+        </p>
+
+        <a
+            href="{{ url_for('events') }}"
+            class="secondary-btn"
+        >
+            Tampilkan Semua Event
+        </a>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =====================================================
+     ANALYST NOTE
+===================================================== -->
+
+<div class="info-box">
+
+    <div class="info-icon">
+        ℹ
+    </div>
+
+    <div>
+
+        <strong>
+            Analyst Workflow
+        </strong>
+
+        <p>
+            Gunakan filter untuk mempersempit aktivitas berdasarkan
+            event type, severity, source IP, atau kata kunci.
+            Event yang mencurigakan dapat dilanjutkan ke proses
+            investigasi melalui Security Alerts.
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

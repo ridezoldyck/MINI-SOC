@@ -1,0 +1,452 @@
+{% extends "base.html" %}
+
+{% block title %}
+Event Detail · Mini SOC
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <div class="eyebrow">
+            SECURITY EVENTS
+        </div>
+
+        <h1>
+            Event Detail
+        </h1>
+
+        <p>
+            Detailed analysis of security event
+            #{{ event["id"] }}
+        </p>
+    </div>
+
+    <a
+        href="{{ url_for('events') }}"
+        class="secondary-btn"
+    >
+        ← Back to Events
+    </a>
+
+</div>
+
+
+<!-- EVENT SUMMARY -->
+
+<div class="detail-grid">
+
+    <div class="detail-card">
+
+        <div class="detail-card-header">
+
+            <div>
+                <span class="detail-label">
+                    EVENT TYPE
+                </span>
+
+                <h2>
+                    {{ event["event_type"] }}
+                </h2>
+            </div>
+
+            <span
+                class="event-badge
+                {% if event['event_type'] == 'LOGIN_FAILED' %}
+                    event-login-failed
+                {% elif event['event_type'] == 'LOGIN_SUCCESS' %}
+                    event-login-success
+                {% elif event['event_type'] == 'NETWORK_SCAN' %}
+                    event-network-scan
+                {% elif event['event_type'] == 'SUSPICIOUS_PROCESS' %}
+                    event-suspicious-process
+                {% else %}
+                    event-default
+                {% endif %}
+                "
+            >
+                {{ event["event_type"] }}
+            </span>
+
+        </div>
+
+
+        <div class="detail-list">
+
+            <div class="detail-row">
+
+                <span>
+                    Event ID
+                </span>
+
+                <strong>
+                    #{{ event["id"] }}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-row">
+
+                <span>
+                    Timestamp
+                </span>
+
+                <strong>
+                    {{ event["created_at"] }}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-row">
+
+                <span>
+                    Username
+                </span>
+
+                <strong>
+                    {{ event["username"] or "-" }}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-row">
+
+                <span>
+                    Source IP
+                </span>
+
+                <strong class="mono">
+                    {{ event["source_ip"] or "-" }}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-row">
+
+                <span>
+                    Destination IP
+                </span>
+
+                <strong class="mono">
+                    {{ event["destination_ip"] or "-" }}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-row">
+
+                <span>
+                    Destination Port
+                </span>
+
+                <strong>
+                    {{ event["destination_port"] or "-" }}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-row">
+
+                <span>
+                    Process
+                </span>
+
+                <strong class="mono">
+                    {{ event["process_name"] or "-" }}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-row">
+
+                <span>
+                    Severity
+                </span>
+
+                <span
+                    class="severity-badge
+                    severity-{{ (event['severity'] or 'INFO')|lower }}"
+                >
+                    {{ event["severity"] or "INFO" }}
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- DETAILS -->
+
+    <div class="detail-card">
+
+        <div class="detail-card-header">
+
+            <div>
+
+                <span class="detail-label">
+                    EVENT DATA
+                </span>
+
+                <h2>
+                    Event Details
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="event-detail-box">
+
+            {% if event["details"] %}
+
+                {{ event["details"] }}
+
+            {% else %}
+
+                <span class="muted">
+                    No additional details available.
+                </span>
+
+            {% endif %}
+
+        </div>
+
+
+        <div class="analyst-note">
+
+            <div class="info-icon">
+                i
+            </div>
+
+            <div>
+
+                <strong>
+                    Analyst Guidance
+                </strong>
+
+                <p>
+                    Review the source IP, username,
+                    process and event timeline before
+                    determining whether this event is
+                    suspicious.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- RELATED ALERTS -->
+
+<div class="section-header">
+
+    <div>
+
+        <span class="detail-label">
+            DETECTION
+        </span>
+
+        <h2>
+            Related Alerts
+        </h2>
+
+    </div>
+
+    <span class="section-count">
+        {{ related_alerts|length }}
+        alert(s)
+    </span>
+
+</div>
+
+
+<div class="table-card">
+
+    {% if related_alerts %}
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            ALERT
+                        </th>
+
+                        <th>
+                            TYPE
+                        </th>
+
+                        <th>
+                            SEVERITY
+                        </th>
+
+                        <th>
+                            SOURCE IP
+                        </th>
+
+                        <th>
+                            STATUS
+                        </th>
+
+                        <th>
+                            CREATED
+                        </th>
+
+                        <th>
+                            ACTION
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for alert in related_alerts %}
+
+                    <tr>
+
+                        <td>
+                            <strong>
+                                #{{ alert["id"] }}
+                            </strong>
+                        </td>
+
+
+                        <td>
+
+                            {{ alert["alert_type"] }}
+
+                        </td>
+
+
+                        <td>
+
+                            <span
+                                class="severity-badge
+                                severity-{{ (alert['severity'] or 'INFO')|lower }}"
+                            >
+                                {{ alert["severity"] or "INFO" }}
+                            </span>
+
+                        </td>
+
+
+                        <td class="mono">
+
+                            {{ alert["source_ip"] or "-" }}
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="status-badge">
+
+                                {{ alert["status"] }}
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            {{ alert["created_at"] }}
+
+                        </td>
+
+
+                        <td>
+
+                            <a
+                                href="{{ url_for(
+                                    'incident',
+                                    alert_id=alert['id']
+                                ) }}"
+                                class="table-action"
+                            >
+                                Investigate
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <div class="empty-state">
+
+            <div class="empty-icon">
+                ✓
+            </div>
+
+            <h3>
+                No Related Alerts
+            </h3>
+
+            <p>
+                This event has not been associated
+                with a security alert.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- ANALYST WORKFLOW -->
+
+<div class="info-box">
+
+    <div class="info-icon">
+        →
+    </div>
+
+    <div>
+
+        <strong>
+            Analyst Workflow
+        </strong>
+
+        <p>
+            Event detected → Review event details
+            → Check related alerts → Investigate
+            suspicious activity → Create incident report.
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

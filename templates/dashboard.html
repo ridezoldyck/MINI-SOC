@@ -1,0 +1,635 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard · Mini SOC SIEM
+{% endblock %}
+
+
+{% block page_heading %}
+Dashboard
+{% endblock %}
+
+
+{% block content %}
+
+<div class="content">
+
+
+    <div class="page-header">
+
+        <div>
+
+            <h1>
+                Security Dashboard
+            </h1>
+
+            <p>
+                Monitoring dan analisis aktivitas keamanan
+                pada Mini SOC SIEM Lab.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- STATISTICS -->
+
+    <div class="stats-grid">
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon blue">
+                ▦
+            </div>
+
+            <div class="stat-info">
+
+                <span class="stat-label">
+                    Total Events
+                </span>
+
+                <strong>
+                    {{ total_events }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon green">
+                ✓
+            </div>
+
+            <div class="stat-info">
+
+                <span class="stat-label">
+                    Successful Login
+                </span>
+
+                <strong>
+                    {{ successful_logins }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon orange">
+                !
+            </div>
+
+            <div class="stat-info">
+
+                <span class="stat-label">
+                    Failed Login
+                </span>
+
+                <strong>
+                    {{ failed_logins }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon red">
+                ⚠
+            </div>
+
+            <div class="stat-info">
+
+                <span class="stat-label">
+                    Open Alerts
+                </span>
+
+                <strong>
+                    {{ open_alerts }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- OPERATIONS -->
+
+    <div class="section-header">
+
+        <div>
+
+            <h2>
+                Security Operations
+            </h2>
+
+            <p>
+                Gunakan modul berikut untuk melakukan monitoring
+                dan investigasi.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="quick-grid">
+
+
+        <a
+            href="{{ url_for('events') }}"
+            class="quick-card"
+        >
+
+            <div class="quick-icon blue">
+                ▣
+            </div>
+
+            <div>
+
+                <h3>
+                    Security Events
+                </h3>
+
+                <p>
+                    Melihat seluruh event keamanan
+                    yang diterima SIEM.
+                </p>
+
+            </div>
+
+            <span class="quick-arrow">
+                →
+            </span>
+
+        </a>
+
+
+        <a
+            href="{{ url_for('alerts') }}"
+            class="quick-card"
+        >
+
+            <div class="quick-icon red">
+                ⚠
+            </div>
+
+            <div>
+
+                <h3>
+                    Security Alerts
+                </h3>
+
+                <p>
+                    Melihat alert yang dihasilkan
+                    detection engine.
+                </p>
+
+            </div>
+
+            <span class="quick-arrow">
+                →
+            </span>
+
+        </a>
+
+
+        <a
+            href="{{ url_for('detections') }}"
+            class="quick-card"
+        >
+
+            <div class="quick-icon green">
+                ◈
+            </div>
+
+            <div>
+
+                <h3>
+                    Detection Rules
+                </h3>
+
+                <p>
+                    Melihat rule yang digunakan
+                    untuk mendeteksi aktivitas.
+                </p>
+
+            </div>
+
+            <span class="quick-arrow">
+                →
+            </span>
+
+        </a>
+
+
+    </div>
+
+
+    <!-- RECENT EVENTS -->
+
+    <div class="section-header">
+
+        <div>
+
+            <h2>
+                Recent Security Events
+            </h2>
+
+            <p>
+                Aktivitas keamanan terbaru.
+            </p>
+
+        </div>
+
+        <a
+            href="{{ url_for('events') }}"
+            class="text-link"
+        >
+            Lihat semua →
+        </a>
+
+    </div>
+
+
+    <div class="table-card">
+
+        <div class="table-wrapper">
+
+            <table class="data-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Time
+                        </th>
+
+                        <th>
+                            Event
+                        </th>
+
+                        <th>
+                            User
+                        </th>
+
+                        <th>
+                            Source IP
+                        </th>
+
+                        <th>
+                            Details
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                {% for event in recent_events %}
+
+                    <tr>
+
+                        <td>
+                            {{ event["created_at"] }}
+                        </td>
+
+                        <td>
+
+                            {% if event["event_type"] == "LOGIN_SUCCESS" %}
+
+                                <span class="badge badge-success">
+                                    LOGIN SUCCESS
+                                </span>
+
+                            {% elif event["event_type"] == "LOGIN_FAILED" %}
+
+                                <span class="badge badge-danger">
+                                    LOGIN FAILED
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge badge-info">
+                                    {{ event["event_type"] }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {{ event["username"] or "-" }}
+                        </td>
+
+                        <td>
+                            <code>
+                                {{ event["source_ip"] or "-" }}
+                            </code>
+                        </td>
+
+                        <td>
+                            {{ event["details"] or "-" }}
+                        </td>
+
+                    </tr>
+
+                {% else %}
+
+                    <tr>
+
+                        <td
+                            colspan="5"
+                            style="text-align:center;"
+                        >
+                            Belum ada security event.
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- RECENT ALERTS -->
+
+    <div class="section-header">
+
+        <div>
+
+            <h2>
+                Recent Alerts
+            </h2>
+
+            <p>
+                Alert terbaru dari detection engine.
+            </p>
+
+        </div>
+
+        <a
+            href="{{ url_for('alerts') }}"
+            class="text-link"
+        >
+            Lihat semua →
+        </a>
+
+    </div>
+
+
+    <div class="table-card">
+
+        <div class="table-wrapper">
+
+            <table class="data-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Alert
+                        </th>
+
+                        <th>
+                            Severity
+                        </th>
+
+                        <th>
+                            Source
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Time
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                {% for alert in recent_alerts %}
+
+                    <tr>
+
+                        <td>
+                            <strong>
+                                {{ alert["alert_type"] }}
+                            </strong>
+                        </td>
+
+                        <td>
+
+                            {% if alert["severity"] == "HIGH" %}
+
+                                <span class="badge badge-danger">
+                                    HIGH
+                                </span>
+
+                            {% elif alert["severity"] == "MEDIUM" %}
+
+                                <span class="badge badge-warning">
+                                    MEDIUM
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge badge-info">
+                                    {{ alert["severity"] }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            <code>
+                                {{ alert["source_ip"] or "-" }}
+                            </code>
+                        </td>
+
+                        <td>
+                            <span class="badge badge-warning">
+                                {{ alert["status"] }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {{ alert["created_at"] }}
+                        </td>
+
+                    </tr>
+
+                {% else %}
+
+                    <tr>
+
+                        <td
+                            colspan="5"
+                            style="text-align:center;"
+                        >
+                            Belum ada alert.
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- WORKFLOW -->
+
+    <div class="section-header">
+
+        <div>
+
+            <h2>
+                SOC Workflow
+            </h2>
+
+            <p>
+                Alur kerja monitoring keamanan pada project.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="workflow">
+
+
+        <div class="workflow-step">
+
+            <div class="workflow-number">
+                1
+            </div>
+
+            <div>
+
+                <h3>
+                    Collect
+                </h3>
+
+                <p>
+                    Mengumpulkan security events.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="workflow-line"></div>
+
+
+        <div class="workflow-step">
+
+            <div class="workflow-number">
+                2
+            </div>
+
+            <div>
+
+                <h3>
+                    Detect
+                </h3>
+
+                <p>
+                    Menganalisis pola mencurigakan.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="workflow-line"></div>
+
+
+        <div class="workflow-step">
+
+            <div class="workflow-number">
+                3
+            </div>
+
+            <div>
+
+                <h3>
+                    Investigate
+                </h3>
+
+                <p>
+                    Melakukan analisis terhadap alert.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="workflow-line"></div>
+
+
+        <div class="workflow-step">
+
+            <div class="workflow-number">
+                4
+            </div>
+
+            <div>
+
+                <h3>
+                    Report
+                </h3>
+
+                <p>
+                    Mendokumentasikan hasil investigasi.
+                </p>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+{% endblock %}

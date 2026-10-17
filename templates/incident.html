@@ -1,0 +1,658 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- =====================================================
+     INCIDENT HEADER
+===================================================== -->
+
+<div class="page-header">
+
+    <div>
+
+        <div class="eyebrow">
+            INCIDENT INVESTIGATION
+        </div>
+
+        <h1>
+            {{ alert["alert_type"] }}
+        </h1>
+
+        <p>
+            {{ alert["description"] }}
+        </p>
+
+    </div>
+
+    <div>
+
+        {% if alert["severity"] == "HIGH" %}
+            <span class="badge badge-danger">
+                HIGH
+            </span>
+
+        {% elif alert["severity"] == "MEDIUM" %}
+            <span class="badge badge-warning">
+                MEDIUM
+            </span>
+
+        {% else %}
+            <span class="badge badge-info">
+                {{ alert["severity"] }}
+            </span>
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ALERT INFORMATION
+===================================================== -->
+
+<div class="grid grid-4">
+
+    <div class="card">
+
+        <div class="eyebrow">
+            ALERT TYPE
+        </div>
+
+        <strong>
+            {{ alert["alert_type"] }}
+        </strong>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="eyebrow">
+            SEVERITY
+        </div>
+
+        <strong>
+            {{ alert["severity"] }}
+        </strong>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="eyebrow">
+            SOURCE IP
+        </div>
+
+        <strong>
+            {{ alert["source_ip"] or "-" }}
+        </strong>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="eyebrow">
+            STATUS
+        </div>
+
+        <strong>
+            {{ alert["status"] }}
+        </strong>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     TRIGGERING EVENT
+===================================================== -->
+
+{% if triggering_event %}
+
+<div class="card">
+
+    <div class="eyebrow">
+        DETECTION SOURCE
+    </div>
+
+    <h2>
+        Triggering Event
+    </h2>
+
+    <p>
+        Event yang secara langsung memicu alert ini.
+    </p>
+
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+                    <th>TIME</th>
+                    <th>EVENT</th>
+                    <th>USER</th>
+                    <th>SOURCE IP</th>
+                    <th>DESTINATION</th>
+                    <th>PROCESS</th>
+                    <th>SEVERITY</th>
+                    <th>DETAILS</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>
+                        #{{ triggering_event["id"] }}
+                    </td>
+
+                    <td>
+                        {{ triggering_event["created_at"] }}
+                    </td>
+
+                    <td>
+                        <strong>
+                            {{ triggering_event["event_type"] }}
+                        </strong>
+                    </td>
+
+                    <td>
+                        {{ triggering_event["username"] or "-" }}
+                    </td>
+
+                    <td>
+                        {{ triggering_event["source_ip"] or "-" }}
+                    </td>
+
+                    <td>
+                        {{ triggering_event["destination_ip"] or "-" }}
+                    </td>
+
+                    <td>
+                        {{ triggering_event["process_name"] or "-" }}
+                    </td>
+
+                    <td>
+
+                        <span class="badge badge-warning">
+                            {{ triggering_event["severity"] }}
+                        </span>
+
+                    </td>
+
+                    <td>
+                        {{ triggering_event["details"] or "-" }}
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+
+<!-- =====================================================
+     ANALYST ANALYSIS
+===================================================== -->
+
+<div class="grid grid-2">
+
+    <div class="card">
+
+        <div class="eyebrow">
+            ANALYSIS
+        </div>
+
+        <h2>
+            Analyst Analysis
+        </h2>
+
+        <p>
+            Analisis awal terhadap indikator keamanan.
+        </p>
+
+        <ul>
+
+            <li>
+                Source IP:
+                <strong>
+                    {{ alert["source_ip"] or "-" }}
+                </strong>
+            </li>
+
+            <li>
+                Alert severity:
+                <strong>
+                    {{ alert["severity"] }}
+                </strong>
+            </li>
+
+            <li>
+                Status:
+                <strong>
+                    {{ alert["status"] }}
+                </strong>
+            </li>
+
+            {% if triggering_event %}
+
+            <li>
+                Triggering event:
+                <strong>
+                    #{{ triggering_event["id"] }}
+                    —
+                    {{ triggering_event["event_type"] }}
+                </strong>
+            </li>
+
+            {% endif %}
+
+            <li>
+                Related events:
+                <strong>
+                    {{ related_events|length }}
+                </strong>
+            </li>
+
+        </ul>
+
+    </div>
+
+
+    <!-- =================================================
+         INDICATORS
+    ================================================== -->
+
+    <div class="card">
+
+        <div class="eyebrow">
+            INDICATORS
+        </div>
+
+        <h2>
+            Security Indicators
+        </h2>
+
+        <p>
+            Indicator yang berkaitan dengan incident ini.
+        </p>
+
+
+        <div class="indicator-list">
+
+            <div class="indicator-row">
+
+                <span>
+                    Source IP
+                </span>
+
+                <strong>
+                    {{ alert["source_ip"] or "-" }}
+                </strong>
+
+            </div>
+
+
+            <div class="indicator-row">
+
+                <span>
+                    Alert Type
+                </span>
+
+                <strong>
+                    {{ alert["alert_type"] }}
+                </strong>
+
+            </div>
+
+
+            <div class="indicator-row">
+
+                <span>
+                    Severity
+                </span>
+
+                <strong>
+                    {{ alert["severity"] }}
+                </strong>
+
+            </div>
+
+
+            <div class="indicator-row">
+
+                <span>
+                    Status
+                </span>
+
+                <strong>
+                    {{ alert["status"] }}
+                </strong>
+
+            </div>
+
+
+            {% if alert["event_id"] %}
+
+            <div class="indicator-row">
+
+                <span>
+                    Event ID
+                </span>
+
+                <strong>
+                    #{{ alert["event_id"] }}
+                </strong>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     EVENT TIMELINE
+===================================================== -->
+
+<div class="card">
+
+    <div class="eyebrow">
+        EVENT TIMELINE
+    </div>
+
+    <h2>
+        Related Security Events
+    </h2>
+
+    <p>
+        Event lain dari source IP yang berkaitan dengan incident ini.
+    </p>
+
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>TIME</th>
+                    <th>EVENT</th>
+                    <th>USER</th>
+                    <th>SOURCE IP</th>
+                    <th>DESTINATION</th>
+                    <th>PROCESS</th>
+                    <th>SEVERITY</th>
+                    <th>DETAILS</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for event in related_events %}
+
+                <tr>
+
+                    <td>
+                        {{ event["created_at"] }}
+                    </td>
+
+                    <td>
+
+                        <a
+                            href="{{ url_for(
+                                'event_detail',
+                                event_id=event['id']
+                            ) }}"
+                            class="table-action"
+                        >
+                            {{ event["event_type"] }}
+                        </a>
+
+                    </td>
+
+                    <td>
+                        {{ event["username"] or "-" }}
+                    </td>
+
+                    <td>
+                        {{ event["source_ip"] or "-" }}
+                    </td>
+
+                    <td>
+                        {{ event["destination_ip"] or "-" }}
+                    </td>
+
+                    <td>
+                        {{ event["process_name"] or "-" }}
+                    </td>
+
+                    <td>
+
+                        <span class="badge badge-info">
+                            {{ event["severity"] }}
+                        </span>
+
+                    </td>
+
+                    <td>
+                        {{ event["details"] or "-" }}
+                    </td>
+
+                </tr>
+
+                {% else %}
+
+                <tr>
+
+                    <td colspan="8">
+
+                        <div class="empty-state">
+
+                            Tidak ada related event.
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     RESPONSE / ACTION
+===================================================== -->
+
+<div class="card">
+
+    <div class="eyebrow">
+        RESPONSE
+    </div>
+
+    <h2>
+        Analyst Action
+    </h2>
+
+    <p>
+        Tindakan yang dapat dilakukan analyst terhadap alert.
+    </p>
+
+
+    <!-- =================================================
+         OPEN
+    ================================================== -->
+
+    {% if alert["status"] == "OPEN" %}
+
+    <div class="incident-actions">
+
+        <form
+            method="POST"
+            action="{{ url_for(
+                'start_investigation',
+                alert_id=alert['id']
+            ) }}"
+        >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                🔍 Start Investigation
+            </button>
+
+        </form>
+
+
+        <form
+            method="POST"
+            action="{{ url_for(
+                'close_alert',
+                alert_id=alert['id']
+            ) }}"
+        >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+
+            <button
+                type="submit"
+                class="btn btn-success"
+            >
+                ✓ Close Alert
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- =================================================
+         INVESTIGATING
+    ================================================== -->
+
+    {% elif alert["status"] == "INVESTIGATING" %}
+
+    <div class="investigation-status">
+
+        <div class="status-icon">
+            🔍
+        </div>
+
+        <div>
+
+            <h3>
+                Investigation sedang berlangsung
+            </h3>
+
+            <p>
+                Alert sedang dianalisis oleh analyst.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="incident-actions">
+
+        <form
+            method="POST"
+            action="{{ url_for(
+                'close_alert',
+                alert_id=alert['id']
+            ) }}"
+        >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+
+            <button
+                type="submit"
+                class="btn btn-success"
+            >
+                ✓ Close Alert
+            </button>
+
+            <a
+                href="{{ url_for(
+                    'incident_report',
+                    alert_id=alert['id']
+                ) }}"
+                class="btn btn-primary"
+            >
+                📄 Incident Report
+            </a>
+
+        </form>
+
+    </div>
+
+
+    <!-- =================================================
+         CLOSED
+    ================================================== -->
+
+    {% elif alert["status"] == "CLOSED" %}
+
+    <div class="closed-status">
+
+        <div class="status-icon">
+            ✓
+        </div>
+
+        <div>
+
+            <h3>
+                Alert sudah ditutup
+            </h3>
+
+            <p>
+                Incident ini sudah ditandai sebagai CLOSED.
+            </p>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+
+{% endblock %}

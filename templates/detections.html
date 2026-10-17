@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}
+Detection Rules · Mini SOC
+{% endblock %}
+
+{% block page_heading %}
+Detection Rules
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <div class="eyebrow">
+            SECURITY INFORMATION & EVENT MANAGEMENT
+        </div>
+
+        <h2>
+            Detection Rules
+        </h2>
+
+        <p>
+            Aturan yang digunakan Detection Engine untuk
+            mengidentifikasi aktivitas keamanan yang mencurigakan.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="rules-grid">
+
+{% for rule in rules %}
+
+    <div class="rule-card">
+
+        <div class="rule-header">
+
+            <div class="rule-icon">
+                {{ rule.icon }}
+            </div>
+
+            <div>
+
+                <span class="rule-id">
+                    {{ rule.code }}
+                </span>
+
+                <h3>
+                    {{ rule.title }}
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <div class="rule-content">
+
+            <p>
+                {{ rule.summary }}
+            </p>
+
+
+            <div class="rule-detail">
+
+                <div>
+                    <span>Event Type</span>
+
+                    <strong>
+                        {{ rule.event_type }}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>Condition</span>
+
+                    <strong>
+                        {{ rule.condition }}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>Severity</span>
+
+                    <span class="badge {{ rule.severity | lower }}">
+                        {{ rule.severity }}
+                    </span>
+                </div>
+
+
+                <div>
+                    <span>MITRE ATT&amp;CK</span>
+
+                    <strong>
+                        {{ rule.mitre }}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>Status</span>
+
+                    {% if rule.enabled %}
+
+                        <span class="rule-status enabled">
+                            ● ENABLED
+                        </span>
+
+                    {% else %}
+
+                        <span class="rule-status disabled">
+                            ● DISABLED
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="rule-action">
+
+                {% if current_role == "admin" %}
+
+                <form
+                    method="POST"
+                    action="{{ url_for(
+                        'toggle_detection_rule',
+                        rule_code=rule.code
+                    ) }}"
+                >
+
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    {% if rule.enabled %}
+
+                        <button
+                            type="submit"
+                            class="rule-toggle disable"
+                        >
+                            Disable Rule
+                        </button>
+
+                    {% else %}
+
+                        <button
+                            type="submit"
+                            class="rule-toggle enable"
+                        >
+                            Enable Rule
+                        </button>
+
+                    {% endif %}
+
+                </form>
+
+                {% else %}
+
+                    <span class="muted">
+                        Hanya admin yang dapat mengubah status rule.
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% endfor %}
+
+</div>
+
+
+<!-- =====================================================
+     ANALYST WORKFLOW
+     ===================================================== -->
+
+<div class="info-box">
+
+    <div class="info-icon">
+        ℹ
+    </div>
+
+    <div>
+
+        <strong>
+            Analyst Workflow
+        </strong>
+
+        <p>
+            Detection Rules hanya melakukan identifikasi terhadap
+            event. Analyst tetap melakukan investigasi terhadap
+            alert sebelum menentukan apakah aktivitas tersebut
+            merupakan ancaman atau false positive.
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

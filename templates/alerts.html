@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+
+{% block title %}
+Security Alerts · Mini SOC
+{% endblock %}
+
+{% block page_heading %}
+Security Alerts
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <div class="eyebrow">
+            SECURITY OPERATIONS CENTER
+        </div>
+
+        <h2>
+            Security Alerts
+        </h2>
+
+        <p>
+            Alert yang dihasilkan oleh Detection Engine.
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     FILTER
+===================================================== -->
+
+<div class="alert-filters">
+
+    <a
+        href="{{ url_for('alerts', status='ALL') }}"
+        class="filter-button {% if status_filter == 'ALL' %}active{% endif %}"
+    >
+        Semua
+    </a>
+
+
+    <a
+        href="{{ url_for('alerts', status='OPEN') }}"
+        class="filter-button {% if status_filter == 'OPEN' %}active{% endif %}"
+    >
+        Open
+    </a>
+
+
+    <a
+        href="{{ url_for('alerts', status='INVESTIGATING') }}"
+        class="filter-button {% if status_filter == 'INVESTIGATING' %}active{% endif %}"
+    >
+        Investigating
+    </a>
+
+
+    <a
+        href="{{ url_for('alerts', status='CLOSED') }}"
+        class="filter-button {% if status_filter == 'CLOSED' %}active{% endif %}"
+    >
+        Closed
+    </a>
+
+</div>
+
+<!-- =====================================================
+     ALERT TABLE
+===================================================== -->
+
+<div class="table-card">
+
+    <div class="table-header">
+
+        <div>
+
+            <h3>
+                Detection Alerts
+            </h3>
+
+            <p>
+                Daftar aktivitas yang dianggap mencurigakan.
+            </p>
+
+        </div>
+
+        <div class="alert-count">
+
+            {{ alerts|length }}
+
+            alert
+
+        </div>
+
+    </div>
+
+
+    {% if alerts %}
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        ID
+                    </th>
+
+                    <th>
+                        ALERT TYPE
+                    </th>
+
+                    <th>
+                        SEVERITY
+                    </th>
+
+                    <th>
+                        SOURCE IP
+                    </th>
+
+                    <th>
+                        STATUS
+                    </th>
+
+                    <th>
+                        CREATED
+                    </th>
+
+                    <th>
+                        ACTION
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            {% for alert in alerts %}
+
+                <tr>
+
+                    <td>
+                        #{{ alert["id"] }}
+                    </td>
+
+
+                    <td>
+
+                        <strong>
+                            {{ alert["alert_type"] }}
+                        </strong>
+
+                    </td>
+
+
+                    <td>
+
+                        <span
+                            class="badge
+                            severity-{{ alert['severity']|lower }}"
+                        >
+                            {{ alert["severity"] }}
+                        </span>
+
+                    </td>
+
+
+                    <td>
+
+                        <code>
+                            {{ alert["source_ip"] or "-" }}
+                        </code>
+
+                    </td>
+
+
+                    <td>
+
+                        <span class="badge status-{{ alert['status']|lower }}">
+                            {{ alert["status"] }}
+                        </span>
+
+                    </td>
+
+
+                    <td>
+
+                        {{ alert["created_at"] }}
+
+                    </td>
+
+
+                    <td>
+
+                        <div class="alert-actions">
+
+                        <a
+                            href="{{ url_for('incident', alert_id=alert['id']) }}"
+                            class="table-action"
+                        >
+                            Investigate
+                        </a>
+
+
+                        {% if alert["status"] == "OPEN" %}
+
+                        <form
+                            method="POST"
+                            action="{{ url_for(
+                                'start_investigation',
+                                alert_id=alert['id']
+                            ) }}"
+                            style="display:inline;"
+                        >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+
+                            <button
+                                type="submit"
+                                class="action-button action-investigate"
+                            >
+                                Start Investigation
+                            </button>
+
+                        </form>
+
+                        {% endif %}
+
+
+                        {% if alert["status"] == "OPEN"
+                            or alert["status"] == "INVESTIGATING" %}
+
+                        <form
+                            method="POST"
+                            action="{{ url_for(
+                                'close_alert',
+                                alert_id=alert['id']
+                            ) }}"
+                            style="display:inline;"
+                        >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+
+                            <button
+                                type="submit"
+                                class="action-button action-close"
+                            >
+                                Close
+                            </button>
+
+                        </form>
+
+                        {% endif %}
+
+                    </div>
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+    <div class="empty-state">
+
+        <div class="empty-icon">
+            ✓
+        </div>
+
+        <h3>
+            Tidak ada alert
+        </h3>
+
+        <p>
+            Belum ada security alert dengan filter yang dipilih.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =====================================================
+     DETECTION INFORMATION
+===================================================== -->
+
+<div class="info-box">
+
+    <div class="info-icon">
+        ℹ
+    </div>
+
+    <div>
+
+        <strong>
+            Detection Engine
+        </strong>
+
+        <p>
+            Alert dibuat secara otomatis berdasarkan
+            security events yang diterima oleh Mini SIEM.
+            Analyst kemudian melakukan investigasi terhadap
+            alert sebelum menutupnya.
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

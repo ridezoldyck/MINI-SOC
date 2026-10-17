@@ -1,0 +1,18 @@
+# Environment & secrets
+.env
+venv/
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Database lokal
+database/*.db
+database/*.db-journal
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

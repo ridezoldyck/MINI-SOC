@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {% block title %}
+        Mini SOC SIEM
+        {% endblock %}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+<div class="app-shell">
+
+
+    {% if current_user %}
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                S
+            </div>
+
+            <div>
+
+                <strong>
+                    Mini SOC
+                </strong>
+
+                <span>
+                    SIEM Laboratory
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <nav class="nav-menu">
+
+            <a
+                href="{{ url_for('dashboard') }}"
+                class="{% if request.endpoint == 'dashboard' %}active{% endif %}"
+            >
+                <span>▦</span>
+                Dashboard
+            </a>
+
+
+            <a
+                href="{{ url_for('events') }}"
+                class="{% if request.endpoint == 'events' %}active{% endif %}"
+            >
+                <span>◷</span>
+                Security Events
+            </a>
+
+
+            <a
+                href="{{ url_for('alerts') }}"
+                class="{% if request.endpoint in ['alerts', 'incident'] %}active{% endif %}"
+            >
+                <span>⚠</span>
+                Security Alerts
+            </a>
+
+
+            <a
+                href="{{ url_for('detections') }}"
+                class="{% if request.endpoint == 'detections' %}active{% endif %}"
+            >
+                <span>◈</span>
+                Detection Rules
+            </a>
+
+
+            <a
+                href="{{ url_for('profile') }}"
+                class="{% if request.endpoint == 'profile' %}active{% endif %}"
+            >
+                <span>◉</span>
+                Profile
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <div class="lab-box">
+
+                <span class="status-dot"></span>
+
+                <div>
+
+                    <strong>
+                        SIEM ONLINE
+                    </strong>
+
+                    <small>
+                        Local security lab
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <a
+                class="logout-link"
+                href="{{ url_for('logout') }}"
+            >
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+    {% endif %}
+
+
+    <main
+        class="{% if current_user %}main-content{% else %}public-content{% endif %}"
+    >
+
+
+        {% if current_user %}
+
+        <header class="topbar">
+
+            <div>
+
+                <div class="eyebrow">
+                    SECURITY INFORMATION & EVENT MANAGEMENT
+                </div>
+
+                <h1>
+                    {% block page_heading %}
+                    Dashboard
+                    {% endblock %}
+                </h1>
+
+            </div>
+
+
+            <div class="user-chip">
+
+                <div class="avatar">
+                    {{ current_user[0]|upper }}
+                </div>
+
+                <div>
+
+                    <strong>
+                        {{ current_user }}
+                    </strong>
+
+                    <span>
+                        {{ current_role }}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+        {% endif %}
+
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% for category, message in messages %}
+
+                <div class="flash {{ category }}">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endwith %}
+
+
+        {% block content %}
+
+        {% endblock %}
+
+
+        {% if current_user %}
+
+        <footer class="footer">
+
+            Mini SOC SIEM Laboratory ·
+            Cybersecurity Portfolio Project ·
+            {{ current_year }}
+
+        </footer>
+
+        {% endif %}
+
+
+    </main>
+
+</div>
+
+
+<script
+    src="{{ url_for('static', filename='js/dashboard.js') }}"
+></script>
+
+</body>
+
+</html>

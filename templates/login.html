@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}
+Login · Mini SOC SIEM
+{% endblock %}
+
+
+{% block content %}
+
+<div class="login-page">
+
+    <div class="login-brand">
+
+        <div class="brand-icon large">
+            S
+        </div>
+
+        <div>
+
+            <h1>
+                Mini SOC
+            </h1>
+
+            <p>
+                SIEM Security Laboratory
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="login-card">
+
+        <div class="card-heading">
+
+            <span class="eyebrow">
+                SECURITY OPERATIONS
+            </span>
+
+            <h2>
+                Sign in
+            </h2>
+
+            <p>
+                Masuk ke lingkungan monitoring keamanan.
+            </p>
+
+        </div>
+
+
+        {% if message %}
+
+        <div class="error-message">
+            {{ message }}
+        </div>
+
+        {% endif %}
+
+
+        <form
+            method="POST"
+            class="login-form"
+        >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+
+            <label for="username">
+                Username
+            </label>
+
+            <input
+                id="username"
+                name="username"
+                type="text"
+                placeholder="Masukkan username"
+                autocomplete="username"
+                required
+            >
+
+
+            <label for="password">
+                Password
+            </label>
+
+            <input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Masukkan password"
+                autocomplete="current-password"
+                required
+            >
+
+
+            <button
+                class="primary-btn"
+                type="submit"
+            >
+                Sign in
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <p class="login-note">
+
+        Local cybersecurity training environment ·
+        Not for production
+
+    </p>
+
+</div>
+
+{% endblock %}
